@@ -19,11 +19,12 @@ routerC.get('/', async (req, res) => {
     let carritos = []
     try {
         // carritos = await cartsModelo.find({ deleted: false }).populate('products.product').lean()
-        carritos = await cartsModelo.paginate({},{limit})
+        carritos = await cartsModelo.paginate({},{lean:true})
+        console.log(carritos)
     } catch (error) {
         console.log(error.message)
     }
-    res.status(200).json({ carritos });
+    res.status(200).render('carts',{ carritos:carritos.docs});
 });
 
 routerC.get('/:cid', async (req, res) => {
