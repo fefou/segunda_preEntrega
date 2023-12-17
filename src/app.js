@@ -3,7 +3,7 @@ import express from 'express'
 import productosRouter from './routes/productosRouter.js'
 import carritoRouter from './routes/carritoRouter.js'
 import { engine } from 'express-handlebars'
-import { router as vistasRouter} from './routes/vistasRouter.js'
+import { router as vistasRouter } from './routes/vistasRouter.js'
 import { Server } from 'socket.io'
 import __dirname from './utils.js'
 import path from 'path'
@@ -11,7 +11,7 @@ import pm from './manager/productManager.js'
 import mongoose from 'mongoose'
 import { messagesModelo } from './dao/models/messages.model.js'
 
-const productos=pm.getProducts()
+const productos = pm.getProducts()
 const app = express()
 const port = 3000
 
@@ -34,36 +34,36 @@ app.use('/api/products', productosRouter)
 app.use('/api/carts', carritoRouter)
 app.use('/', vistasRouter)
 
-const serverHTTP=app.listen(port, () => {
+const serverHTTP = app.listen(port, () => {
     console.log(`Server escuchando en puerto ${port}`);
 })
 
- let usuarios=[]
- let mensajes=[]
+let usuarios = []
+let mensajes = []
 
-export const serverSockets=new Server(serverHTTP)
+export const serverSockets = new Server(serverHTTP)
 
-serverSockets.on("connection",socket=>{
+serverSockets.on("connection", socket => {
     console.log(`se conecto un cliente con id ${socket.id}`)
 
 
-    socket.on('id', email=>{
+    socket.on('id', email => {
 
-        usuarios.push({email, id:socket.id})
+        usuarios.push({ email, id: socket.id })
         socket.broadcast.emit('nuevoUsuario', email)
         socket.emit("Hola", mensajes)
     })
 
-    socket.on('mensaje',datos=>{
+    socket.on('mensaje', datos => {
         mensajes.push(datos)
         serverSockets.emit('nuevoMensaje', datos)
 
-        messagesModelo.create({user:datos.emisor, message:datos.mensaje})
+        messagesModelo.create({ user: datos.emisor, message: datos.mensaje })
     })
 
-    socket.on("disconnect",()=>{
-        let usuario=usuarios.find(u=>u.id===socket.id)
-        if(usuario){
+    socket.on("disconnect", () => {
+        let usuario = usuarios.find(u => u.id === socket.id)
+        if (usuario) {
             serverSockets.emit('usuarioDesconectado', usuario.email)
         }
     })
@@ -71,7 +71,7 @@ serverSockets.on("connection",socket=>{
 
 
 try {
-    await mongoose.connect('mongodb+srv://ffedecairo:CoderCoder@cluster0.uazzwoe.mongodb.net/?retryWrites=true&w=majority',{dbName: 'ecommerce'})
+    await mongoose.connect('mongodb+srv://ffedecairo:CoderCoder@cluster0.uazzwoe.mongodb.net/?retryWrites=true&w=majority', { dbName: 'ecommerce' })
 
     console.log('DB Online')
 } catch (error) {

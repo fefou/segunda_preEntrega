@@ -2,12 +2,19 @@
 <hr>
 <div>
     {{#each carts}}    
-    <p>{{this.Products}}</p>
-    <p>{{this.quantity}}</p>
-    <hr>
+        <p>Productos:</p>
+        <ul>
+            {{#each this.products}}
+                <li>
+                    {{!-- Acceder a las propiedades del objeto product --}}
+                    Nombre: {{this.product.title}}<br>
+                    Cantidad: {{this.quantity}}
+                </li>
+            {{/each}}
+        </ul>
+        <hr>
     {{/each}}
 </div>
-
 
 <br></br>
 <a href="/">Home</a>

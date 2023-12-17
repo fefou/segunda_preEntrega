@@ -18,13 +18,15 @@ import { productsModelo } from '../dao/models/products.model.js'
 routerC.get('/', async (req, res) => {
     let carritos = []
     try {
-        // carritos = await cartsModelo.find({ deleted: false }).populate('products.product').lean()
-        carritos = await cartsModelo.paginate({},{lean:true})
+        carritos = await cartsModelo.find({ deleted: false }).populate('products.product').lean()
+        // carritos = await cartsModelo.paginate({},{lean:true}, {populate:'products.product'})
         console.log(carritos)
     } catch (error) {
         console.log(error.message)
     }
-    res.status(200).render('carts',{ carritos:carritos.docs});
+
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).json({ carritos});
 });
 
 routerC.get('/:cid', async (req, res) => {
