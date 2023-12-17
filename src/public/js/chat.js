@@ -12,6 +12,7 @@ Swal.fire({
         return !value && 'debe ingresar un email'
     },
     allowOutsideClick: false,
+    allowEscapeKey: false,
 
 }).then(resultado => {
     console.log(resultado)
