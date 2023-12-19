@@ -26,20 +26,36 @@ function saveProducts(productos) {
 
 
 
-routerP.get('/',async (req, res) => {
-let productos=[]
+routerP.get('/', async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     try {
-        productos = await productsModelo.find({deleted:false})        
+        const totalProducts = await productsModelo.countDocuments({deleted:false});
+        const totalPages = Math.ceil(totalProducts / limit);
+        const products = await productsModelo.find({deleted:false}).skip(skip).limit(limit);
+
+        const response = {
+            status: 'success',
+            payload: products,
+            totalPages: totalPages,
+            prevPage: page > 1 ? page - 1 : null,
+            nextPage: page < totalPages ? page + 1 : null,
+            page: page,
+            hasPrevPage: page > 1,
+            hasNextPage: page < totalPages,
+            prevLink: page > 1 ? `/products?page=${page - 1}&limit=${limit}` : null,
+            nextLink: page < totalPages ? `/products?page=${page + 1}&limit=${limit}` : null
+        };
+
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).json(response);
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
+        res.setHeader('Content-Type', 'application/json');
+        res.status(500).json({ status: 'error', payload: error.message });
     }
-
-    if (req.query.limit) {
-        productos = productos.slice(0, req.query.limit)
-    }
-
-    res.setHeader('Content-Type', 'application/json');
-    res.status(200).json({ filtros: req.query, productos });
 });
 
 routerP.get('/:id',async (req, res) => {
