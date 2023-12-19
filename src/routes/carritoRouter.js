@@ -26,7 +26,7 @@ routerC.get('/', async (req, res) => {
     }
 
     res.setHeader('Content-Type', 'application/json');
-    return res.status(200).json({ carritos});
+    return res.status(200).json({ carritos });
 });
 
 routerC.get('/:cid', async (req, res) => {
@@ -115,10 +115,10 @@ routerC.post('/:cid/products/:pid', async (req, res) => {
     //    si los ID son correctos, entonces agregar el producto al carrito
 
     let resultado
-    let indice=existeCarrito.products.findIndex(p=>p.product==existeProducto._id.toString())
-    if (indice===-1){
-        existeCarrito.products.push({product:existeProducto._id, quantity:1})
-    }else{
+    let indice = existeCarrito.products.findIndex(p => p.product == existeProducto._id.toString())
+    if (indice === -1) {
+        existeCarrito.products.push({ product: existeProducto._id, quantity: 1 })
+    } else {
         existeCarrito.products[indice].quantity++;
     }
 
@@ -137,8 +137,72 @@ routerC.post('/:cid/products/:pid', async (req, res) => {
     } catch (error) {
         res.setHeader('Content-Type', 'application/json');
         return res.status(500).json({ error: `Error inesperado`, message: error.message });
-    }   
+    }
 })
 
+routerC.delete('/:cid/products/:pid', async (req, res) => {
+    const { cid, pid } = req.params;
+
+    try {
+        const cart = await cartsModelo.findByIdAndUpdate(
+            cid,
+            { $pull: { products: { product: pid } } },
+            { new: true, useFindAndModify: false }
+        ).populate('products.product').lean();
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        res.status(200).json({ cart });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+routerC.delete('/:cid', async (req, res) => {
+    const { cid } = req.params;
+
+    try {
+        const cart = await cartsModelo.findByIdAndUpdate(
+            cid,
+            { $set: { products: [] } },
+            { new: true, useFindAndModify: false }
+        ).lean();
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        res.status(200).json({ cart });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+routerC.put('/:cid/products/:pid', async (req, res) => {
+    const { cid, pid } = req.params;
+    const { quantity } = req.body;
+
+    if (!quantity || quantity < 1) {
+        return res.status(400).json({ message: 'Invalid quantity' });
+    }
+
+    try {
+        const cart = await cartsModelo.findOneAndUpdate(
+            { _id: cid, 'products.product': pid },
+            { $set: { 'products.$.quantity': quantity } },
+            { new: true, useFindAndModify: false }
+        ).populate('products.product').lean();
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart or product not found' });
+        }
+
+        res.status(200).json({ cart });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 export default routerC

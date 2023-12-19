@@ -1,7 +1,8 @@
 <h2>CARRITOS</h2>
 <hr>
 <div>
-    {{#each carts}}    
+    {{#each carts}}   
+        <p>Id: {{this._id}}</p> 
         <p>Productos:</p>
         <ul>
             {{#each this.products}}

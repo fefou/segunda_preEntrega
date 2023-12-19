@@ -1,0 +1,20 @@
+<h1>Carrito</h1>
+
+<ul>
+  {{#each cart.products}}
+    <li>
+      <h2>{{this.product.title}}</h2> <!-- Nombre del producto -->
+      <p>Cantidad: {{this.quantity}}</p>
+      <p>Precio por unidad: {{this.product.price}}</p>
+    </li>
+  {{/each}}
+</ul>
+
+<p>Total de productos: {{cart.products.length}}</p>
+
+
+<br></br>
+<a href="/">Home</a>
+<a href="/realtimeproducts">Productos</a>
+<a href="/carts">Carritos</a>
+<a href="/chat">Chat</a>
